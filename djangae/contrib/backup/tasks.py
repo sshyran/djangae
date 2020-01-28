@@ -61,24 +61,23 @@ def _get_valid_export_models(kinds=None):
     models_to_backup = []
     for model in apps.get_models(include_auto_created=True):
         app_label = model._meta.app_label
-        object_name = model._meta.object_name
-        model_def = "{}_{}".format(app_label, object_name.lower())
+        db_table = model._meta.db_table
 
         if app_label in excluded_apps:
             logger.info(
                 "Not backing up %s due to the %s app being in DJANGAE_BACKUP_EXCLUDE_APPS",
-                model_def, app_label
+                db_table, app_label
             )
             continue
 
         if model_def in excluded_models:
             logger.info(
                 "Not backing up %s as it is blacklisted in DJANGAE_BACKUP_EXCLUDE_MODELS",
-                model_def
+                db_table
             )
             continue
 
-        logger.info("%s added to list of models to backup", model_def)
+        logger.info("%s added to list of models to backup", db_table)
         models_to_backup.append(model_def)
 
     # if kinds we explcitly provided by the caller, we only return those
