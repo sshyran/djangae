@@ -70,7 +70,7 @@ def _get_valid_export_models(kinds=None):
             )
             continue
 
-        if model_def in excluded_models:
+        if db_table in excluded_models:
             logger.info(
                 "Not backing up %s as it is blacklisted in DJANGAE_BACKUP_EXCLUDE_MODELS",
                 db_table
@@ -78,7 +78,7 @@ def _get_valid_export_models(kinds=None):
             continue
 
         logger.info("%s added to list of models to backup", db_table)
-        models_to_backup.append(model_def)
+        models_to_backup.append(db_table)
 
     # if kinds we explcitly provided by the caller, we only return those
     # already validated by our previous checks
