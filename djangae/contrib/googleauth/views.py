@@ -187,6 +187,8 @@ def oauth2callback(request):
                 # and back in again. This is because the user may have
                 # authenticated with another backend, but we need to re-auth
                 # with the OAuth backend
+
+                request.user.refresh_from_db()
                 if request.user.is_authenticated:
                     auth.logout(request)
 
