@@ -18,6 +18,8 @@ class OAuthBackend(BaseBackend):
         if (not oauth_session) or (not oauth_session.is_valid):
             return
 
+        assert(oauth_session.pk)
+
         # FIXME: Refresh the token if it's close to expiry?
 
         profile = oauth_session.profile
