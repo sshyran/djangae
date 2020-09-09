@@ -77,8 +77,15 @@ class AuthenticationMiddleware(AuthenticationMiddleware):
         request.user = SimpleLazyObject(lambda: get_user(request))
 
         backend_str = request.session.get(BACKEND_SESSION_KEY)
+
+        logging.info("Auth middleware")
+
         if request.user.is_authenticated:
+            logging.info("User is authenticated")
+
             if backend_str and isinstance(load_backend(backend_str), OAuthBackend):
+                logging.info("and used oauth...")
+
                 # The user is authenticated with Django, and they use the OAuth backend, so they
                 # should have a valid oauth session
                 oauth_session = OAuthUserSession.objects.filter(
@@ -87,15 +94,22 @@ class AuthenticationMiddleware(AuthenticationMiddleware):
 
                 # Their oauth session expired, so let's log them out
                 if not oauth_session or not oauth_session.is_valid:
+                    logging.info("Has an invalid session")
                     logout(request)
 
             elif backend_str and isinstance(load_backend(backend_str), IAPBackend):
+                logging.info("and used IAP")
+
                 if not IAPBackend.can_authenticate(request):
+                    logging.info("Logging them out")
                     logout(request)
         else:
             # Try to authenticate with IAP if the headers
             # are available
+            logging.info("User isn't logged in")
             if IAPBackend.can_authenticate(request):
+                logging.info("Authenticating with IAP")
+
                 user = authenticate(request)
                 if user and user.is_authenticated:
                     login(request, user)
