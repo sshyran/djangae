@@ -106,6 +106,8 @@ def _calc_expires_at(expires_in):
 
 
 def oauth2callback(request):
+    logging.error("oauth2callback")
+
     original_url = f"{request.scheme}://{request.META['HTTP_HOST']}{reverse('googleauth_oauth2callback')}"
 
     if STATE_SESSION_KEY not in request.session:
