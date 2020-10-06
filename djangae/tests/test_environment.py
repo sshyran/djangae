@@ -1,12 +1,21 @@
 import os
 
 from django.http import HttpResponse
-from django.test import RequestFactory
+from django.test import (
+    Client,
+    RequestFactory,
+    override_settings,
+)
+from django.urls import (
+    path,
+    reverse,
+)
 
 from djangae.contrib import sleuth
 from djangae.decorators import (
     _CRON_TASK_HEADER,
     _TASK_NAME_HEADER,
+    csrf_exempt_if_task,
     task_only,
     task_or_superuser_only,
 )
@@ -116,6 +125,26 @@ class TaskOrSuperuserOnlyTestCase(TestCase):
         request.user = User()
         response = view(request)
         self.assertEqual(response.status_code, 200)
+
+
+@csrf_exempt_if_task
+def view(request):
+    return HttpResponse("Hello")
+
+
+urlpatterns = [
+    path("view", view, name="test_view")
+]
+
+
+@override_settings(ROOT_URLCONF='djangae.tests.test_environment')
+class CsrfExemptIfTaskTest(TestCase):
+    def test_csrf_required_if_normal_view(self):
+        """ If we're in an App Engine task then it should allow the request through. """
+
+        client = Client(enforce_csrf_checks=True)
+        response = client.post(reverse("test_view"))
+        self.assertEqual(response.status_code, 403)
 
 
 class EnvironmentUtilsTest(TestCase):
