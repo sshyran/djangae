@@ -146,6 +146,9 @@ class CsrfExemptIfTaskTest(TestCase):
         response = client.post(reverse("test_view"))
         self.assertEqual(response.status_code, 403)
 
+        response = client.post(reverse("test_view"), HTTP_X_APPENGINE_TASKNAME="test")
+        self.assertEqual(response.status_code, 200)
+
 
 class EnvironmentUtilsTest(TestCase):
 

@@ -54,7 +54,7 @@ def csrf_exempt_if_task(view_function):
 
     class Replacement(object):
         def __call__(self, request, *args, **kwargs):
-            view_function(request, *args, **kwargs)
+            return view_function(request, *args, **kwargs)
 
         @property
         def csrf_exempt(self):
