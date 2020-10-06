@@ -1,9 +1,7 @@
 import os
-from functools import wraps
 from typing import Optional
 
 from djangae.utils import memoized
-from django.http import HttpResponseForbidden
 
 # No SDK imports allowed in module namespace because `./manage.py runserver`
 # imports this before the SDK is added to sys.path. See bugs #899, #1055.
@@ -88,23 +86,6 @@ def get_application_root() -> str:
     # Use the Django base directory as a fallback. We search for app.yaml
     # first because that will be the "true" root of the GAE app
     return settings.BASE_DIR
-
-
-def task_only(view_function):
-    """ View decorator for restricting access to tasks (and crons) of the application
-        only.
-    """
-
-    @wraps(view_function)
-    def replacement(*args, **kwargs):
-        if not any((
-            is_in_task(),
-            is_in_cron(),
-        )):
-            return HttpResponseForbidden("Access denied.")
-        return view_function(*args, **kwargs)
-
-    return replacement
 
 
 def default_gcs_bucket_name() -> str:

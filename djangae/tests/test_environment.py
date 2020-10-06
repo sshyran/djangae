@@ -1,28 +1,39 @@
 import os
 
-from djangae.tasks.deferred import defer
+from django.http import HttpResponse
+from django.test import RequestFactory
+
+from djangae.contrib import sleuth
+from djangae.decorators import (
+    task_only,
+    task_or_superuser_only,
+    _TASK_NAME_HEADER
+)
 from djangae.environment import (
     is_development_environment,
     is_production_environment,
-    task_only,
     task_queue_name,
 )
+from djangae.tasks.deferred import defer
 from djangae.test import TestCase
-from djangae.contrib import sleuth
-from django.http import HttpResponse
 
 
 class TaskOnlyTestCase(TestCase):
     """ Tests for the @task_only decorator. """
 
-    def test_403_if_not_task_or_admin(self):
+    def setUp(self):
+        self.factory = RequestFactory()
+        super().setUp()
+
+    def test_403_if_not_task(self):
         # If we are neither in a task or logged in as an admin, we expect a 403 response
 
         @task_only
         def view(request):
             return HttpResponse("Hello")
 
-        response = view(None)
+        request = self.factory.get("/")
+        response = view(request)
         self.assertEqual(response.status_code, 403)
 
     def test_allowed_if_in_task(self):
@@ -32,8 +43,10 @@ class TaskOnlyTestCase(TestCase):
         def view(request):
             return HttpResponse("Hello")
 
+        request = self.factory.get("/")
         with sleuth.fake("djangae.environment.is_in_task", True):
-            response = view(None)
+            response = view(request)
+
         self.assertEqual(response.status_code, 200)
 
     def test_allowed_if_in_cron(self):
@@ -43,8 +56,62 @@ class TaskOnlyTestCase(TestCase):
         def view(request):
             return HttpResponse("Hello")
 
+        request = self.factory.get("/")
+
         with sleuth.fake("djangae.environment.is_in_cron", True):
-            response = view(None)
+            response = view(request)
+        self.assertEqual(response.status_code, 200)
+
+
+class TaskOrSuperuserOnlyTestCase(TestCase):
+    """ Tests for the @task_only decorator. """
+
+    def setUp(self):
+        self.factory = RequestFactory()
+        super().setUp()
+
+    def test_403_if_not_task_or_superuser(self):
+        # If we are neither in a task or logged in as an admin, we expect a 403 response
+
+        @task_or_superuser_only
+        def view(request):
+            return HttpResponse("Hello")
+
+        request = self.factory.get("/")
+        response = view(request)
+        self.assertEqual(response.status_code, 403)
+
+    def test_allowed_if_in_task(self):
+        """ If we're in an App Engine task then it should allow the request through. """
+
+        @task_or_superuser_only
+        def view(request):
+            return HttpResponse("Hello")
+
+        request = self.factory.get("/")
+        request.META[_TASK_NAME_HEADER] = "test"
+
+        response = view(request)
+        self.assertEqual(response.status_code, 200)
+
+    def test_allowed_if_superuser(self):
+        """ If we're in an App Engine task then it should allow the request through. """
+
+        @task_or_superuser_only
+        def view(request):
+            return HttpResponse("Hello")
+
+        class User(object):
+            is_superuser = True
+            is_authenticated = True
+
+        request = self.factory.get("/")
+        request.user = None
+        response = view(request)
+        self.assertEqual(response.status_code, 403)
+
+        request.user = User()
+        response = view(request)
         self.assertEqual(response.status_code, 200)
 
 

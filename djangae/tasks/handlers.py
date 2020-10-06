@@ -3,7 +3,7 @@ import pickle
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
-from djangae.environment import task_only
+from djangae.decorators import task_only
 
 
 @csrf_exempt

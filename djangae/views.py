@@ -6,7 +6,7 @@ from django.conf import settings
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
-from djangae import environment
+from djangae import environment, decorators
 from djangae.core.signals import module_started, module_stopped
 
 
@@ -73,7 +73,7 @@ def deferred(request):
     return response
 
 
-@environment.task_only
+@decorators.task_only
 def clearsessions(request):
     engine = import_module(settings.SESSION_ENGINE)
     try:
