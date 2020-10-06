@@ -48,10 +48,6 @@ def task_or_superuser_only(view_function):
 
 
 def csrf_exempt_if_task(view_function):
-    @wraps(view_function)
-    def replacement(request, *args, **kwargs):
-        return view_function(request, *args, **kwargs)
-
     class Replacement(object):
         def __call__(self, request, *args, **kwargs):
             return view_function(request, *args, **kwargs)
