@@ -1,8 +1,10 @@
 
 from functools import wraps
-from django.http import HttpResponseForbidden
-from django.core.exceptions import ImproperlyConfigured
 
+from django.core.exceptions import ImproperlyConfigured
+from django.http import HttpResponseForbidden
+
+from djangae.contrib.common import get_request
 
 _TASK_NAME_HEADER = "HTTP_X_APPENGINE_TASKNAME"
 _CRON_TASK_HEADER = "HTTP_X_APPENGINE_CRON"
@@ -54,7 +56,6 @@ def csrf_exempt_if_task(view_function):
 
         @property
         def csrf_exempt(self):
-            from djangae.contrib.common import get_request
             request = get_request()
 
             if not request:
