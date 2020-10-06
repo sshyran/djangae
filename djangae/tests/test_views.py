@@ -8,7 +8,5 @@ class ViewsTests(TestCase):
         response = self.client.post(reverse("clearsessions"))
         self.assertEqual(response.status_code, 403)
 
-        os.environ["HTTP_X_APPENGINE_CRON"] = "1"
-        response = self.client.post(reverse("clearsessions"))
+        response = self.client.post(reverse("clearsessions"), HTTP_X_APPENGINE_CRON="1")
         self.assertEqual(response.status_code, 200)
-        del os.environ["HTTP_X_APPENGINE_CRON"]

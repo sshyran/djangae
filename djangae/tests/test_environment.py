@@ -5,9 +5,10 @@ from django.test import RequestFactory
 
 from djangae.contrib import sleuth
 from djangae.decorators import (
+    _CRON_TASK_HEADER,
+    _TASK_NAME_HEADER,
     task_only,
     task_or_superuser_only,
-    _TASK_NAME_HEADER
 )
 from djangae.environment import (
     is_development_environment,
@@ -44,6 +45,7 @@ class TaskOnlyTestCase(TestCase):
             return HttpResponse("Hello")
 
         request = self.factory.get("/")
+        request.META[_TASK_NAME_HEADER] = "test"
         with sleuth.fake("djangae.environment.is_in_task", True):
             response = view(request)
 
@@ -57,6 +59,7 @@ class TaskOnlyTestCase(TestCase):
             return HttpResponse("Hello")
 
         request = self.factory.get("/")
+        request.META[_CRON_TASK_HEADER] = "test"
 
         with sleuth.fake("djangae.environment.is_in_cron", True):
             response = view(request)
