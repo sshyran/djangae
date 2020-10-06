@@ -32,6 +32,8 @@
 - Update `environment.task_queue_name()` to return `default` if we're in a task and a queue name is not set, otherwise return `None`
 - Update `djangae/tasks/deferred.py` to handle the case where a queue name is not set
 - Add `google-cloud-tasks` as a requirement
+- Move `@task_only` to `djangae.decorators`
+- Add `@task_or_superuser_only` and `@csrf_exempt_if_task`
 
 ### Bug fixes:
 

@@ -45,3 +45,7 @@ View decorator to allow restricting views to tasks (including crons) or admins o
 ## djangae.decorators.task_or_superuser_only
 
 View decorator that allows through tasks, or users with `is_superuser == True`
+
+## djangae.decorators.csrf_except_if_task
+
+View decorator that marks the view csrf_exempt *only* if it's being requested by Cloud Tasks
