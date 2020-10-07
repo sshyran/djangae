@@ -183,7 +183,7 @@ class User(AbstractBaseUser):
     class Meta:
         verbose_name = _('user')
         verbose_name_plural = _('users')
-        # abstract = True
+        abstract = True
 
     def clean(self):
         super().clean()
