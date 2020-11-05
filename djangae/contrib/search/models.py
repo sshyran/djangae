@@ -2,6 +2,7 @@ from django.db import models
 
 from gcloudc.db.models.fields.related import RelatedSetField
 from gcloudc.db.models.fields.json import JSONField
+from gcloudc.db.models.fields.iterable import ListField
 
 from .document import Document
 from .constants import WORD_DOCUMENT_JOIN_STRING
@@ -46,6 +47,10 @@ class TokenFieldIndex(models.Model):
     record = models.ForeignKey("DocumentRecord", on_delete=models.CASCADE)
     token = models.CharField(max_length=500)
     field_name = models.CharField(max_length=500)
+
+    # Indexes of the char position where the token appears in the field
+    # Used for exact matching on results
+    occurrences = ListField(models.IntegerField())
 
     @classmethod
     def document_id_from_pk(cls, pk):

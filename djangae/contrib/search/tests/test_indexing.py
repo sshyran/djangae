@@ -215,3 +215,16 @@ class IndexingTests(TestCase):
             tokens,
             ["This", "-", "is", "some", "text", "with", "-", "hyphens.", "I-B-M", "IBM", "I.B.M"]
         )
+
+    def test_token_occurances(self):
+        text = "I'm testing to see if the occurrances of tokens are stored when we index. Testing"
+
+        class Doc(Document):
+            text = fields.TextField()
+
+        index = Index(name="test")
+        index.add(Doc(text=text))
+
+        occurrences = TokenFieldIndex.objects.get(token="testing").occurrences
+
+        self.assertCountEqual(occurrences, [4, 74])

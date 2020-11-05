@@ -99,21 +99,22 @@ class Index(object):
                         if token is None:
                             continue
 
-                        # FIXME: Update occurrances
-                        try:
-                            obj = TokenFieldIndex.objects.get(
-                                record_id=document.id,
-                                token=token,
-                                index_stats=self.index,
-                                field_name=field.attname
-                            )
-                        except TokenFieldIndex.DoesNotExist:
-                            obj = TokenFieldIndex.objects.create(
-                                record_id=document.id,
-                                index_stats=self.index,
-                                token=token,
-                                field_name=field.attname
-                            )
+                        occurrences = []
+                        idx = str(value).find(str(token))
+                        while idx > -1:
+                            occurrences.append(idx)
+                            idx = str(value).find(str(token), idx + 1)
+
+                        obj, _ = TokenFieldIndex.objects.update_or_create(
+                            record_id=document.id,
+                            token=token,
+                            index_stats=self.index,
+                            field_name=field.attname,
+                            defaults={
+                                "occurrences": occurrences
+                            }
+                        )
+
                         record.token_field_indexes.add(obj)
                 record.save()
 
