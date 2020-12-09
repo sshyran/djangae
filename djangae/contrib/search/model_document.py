@@ -193,10 +193,8 @@ def register(model, model_document):
                 data__instance_id=instance_id
             ).values_list("pk", flat=True)
 
-            assert(len(results) <= 1)
-
-            if results:
-                model_document.index().remove(results[0])
+            for result in results:
+                model_document.index().remove(result)
 
         return wrapped
 
