@@ -172,18 +172,18 @@ class Index(object):
         for doc_or_id in document_or_documents:
             doc_id = doc_or_id.id if isinstance(doc_or_id, Document) else doc_or_id
 
-            try:
-                doc = DocumentRecord.objects.get(pk=doc_id)
-                removed_count += 1
-            except DocumentRecord.DoesNotExist:
-                continue
+            with transaction.non_atomic():
+                try:
+                    doc = DocumentRecord.objects.get(pk=doc_id)
+                    removed_count += 1
+                except DocumentRecord.DoesNotExist:
+                    continue
 
-            TokenFieldIndex.objects.filter(
-                record_id=doc.pk,
-                index_stats_id=self.index.pk
-            ).delete()
-
-            doc.delete()
+                TokenFieldIndex.objects.filter(
+                    record_id=doc.pk,
+                    index_stats_id=self.index.pk
+                ).delete()
+                doc.delete()
 
         return removed_count
 
