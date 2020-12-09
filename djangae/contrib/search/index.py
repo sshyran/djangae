@@ -115,29 +115,30 @@ class Index(object):
                     tokens = set(tokens)  # Remove duplicates
 
                     for token in tokens:
-                        token = field.clean_token(token)
-                        if token is None:
-                            continue
+                        with transaction.atomic(independent=True):
+                            token = field.clean_token(token)
+                            if token is None:
+                                continue
 
-                        if not token.strip():
-                            # Ignore whitespace tokens
-                            continue
+                            if not token.strip():
+                                # Ignore whitespace tokens
+                                continue
 
-                        # FIXME: Update occurrances
-                        try:
-                            obj = TokenFieldIndex.objects.get(
-                                record_id=document.id,
-                                token=token,
-                                index_stats=self.index,
-                                field_name=field.attname
-                            )
-                        except TokenFieldIndex.DoesNotExist:
-                            obj = TokenFieldIndex.objects.create(
-                                record_id=document.id,
-                                index_stats=self.index,
-                                token=token,
-                                field_name=field.attname
-                            )
+                            # FIXME: Update occurrances
+                            try:
+                                obj = TokenFieldIndex.objects.get(
+                                    record_id=document.id,
+                                    token=token,
+                                    index_stats=self.index,
+                                    field_name=field.attname
+                                )
+                            except TokenFieldIndex.DoesNotExist:
+                                obj = TokenFieldIndex.objects.create(
+                                    record_id=document.id,
+                                    index_stats=self.index,
+                                    token=token,
+                                    field_name=field.attname
+                                )
                         record.token_field_indexes.add(obj)
                 record.save()
 
