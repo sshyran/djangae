@@ -389,6 +389,8 @@ def _process_shard(marker_id, shard_number, model, query, callback, finalize, ar
 
         last_pk = None
         for instance in qs.all():
+            logging.info("About to process %s", instance.pk)
+
             last_pk = instance.pk
 
             shard_time = (datetime.now() - start_time).total_seconds()
@@ -396,7 +398,9 @@ def _process_shard(marker_id, shard_number, model, query, callback, finalize, ar
                 raise TimeoutException()
 
             callback_start = datetime.now()
+            logging.info("Processing %s", instance.pk)
             callback(instance, *args, **kwargs)
+            logging.info("Processed %s", instance.pk)
             callback_end = datetime.now()
 
             callback_time = (callback_end - callback_start).total_seconds()
