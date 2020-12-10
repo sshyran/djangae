@@ -458,6 +458,9 @@ def _process_shard(marker_id, shard_number, model, query, callback, finalize, ar
         if last_pk:
             qs = qs.filter(pk__gte=last_pk)
 
+        logging.info("Continuing shard, new where: %s", qs.query.where.children)
+        logging.info("Last pk was: %s", last_pk)
+
         defer(
             _process_shard, marker_id, shard_number, qs.model, qs.query, callback, finalize,
             args=args,
