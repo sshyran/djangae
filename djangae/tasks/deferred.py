@@ -380,6 +380,8 @@ def _process_shard(marker_id, shard_number, model, query, callback, finalize, ar
         )
         return
 
+    first_iteration = True
+
     try:
         qs = model.objects.all()
         qs.query = query
@@ -398,6 +400,8 @@ def _process_shard(marker_id, shard_number, model, query, callback, finalize, ar
             callback_end = datetime.now()
 
             callback_time = (callback_end - callback_start).total_seconds()
+
+            first_iteration = False
 
             if callback_time > _CALLBACK_TIME_LIMIT_IN_SECONDS:
                 logging.warning(
@@ -444,6 +448,12 @@ def _process_shard(marker_id, shard_number, model, query, callback, finalize, ar
             )
         else:
             logger.exception("Error processing shard. Retrying.")
+
+            if first_iteration:
+                # If this is the first iteration, we just re-raise to show that this
+                # is an error-case. We can't do that if it's not the first iteration
+                # because that would mean retrying the previous instances again
+                raise
 
         if last_pk:
             qs = qs.filter(pk__gte=last_pk)

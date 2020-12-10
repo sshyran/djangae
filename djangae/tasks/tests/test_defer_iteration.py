@@ -4,7 +4,10 @@ from djangae.tasks.deferred import (
     defer_iteration_with_finalize,
     get_deferred_shard_index,
 )
-from djangae.test import TestCase
+from djangae.test import (
+    TaskFailedBehaviour,
+    TestCase,
+)
 
 _SHARD_COUNT = 5
 
@@ -107,7 +110,7 @@ class DeferIterationTestCase(TestCase):
             _shards=_SHARD_COUNT
         )
 
-        self.process_task_queues()
+        self.process_task_queues(failure_behaviour=TaskFailedBehaviour.RETRY_TASK)
 
         self.assertEqual(25, DeferIterationTestModel.objects.filter(touched=True).count())
         self.assertEqual(25, DeferIterationTestModel.objects.filter(finalized=True).count())
