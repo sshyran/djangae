@@ -478,6 +478,8 @@ def _generate_shards(
 
     key_ranges = find_key_ranges_for_queryset(queryset, shards)
 
+    logging.info("Deferring key ranges: %s", key_ranges)
+
     marker = DeferIterationMarker.objects.create(
         delete_on_completion=delete_marker,
         callback_name=callback.__name__,
@@ -501,6 +503,8 @@ def _generate_shards(
 
         if end:
             filter_kwargs["pk__lt"] = end
+
+        logging.info("Applying filter: %s", filter_kwargs)
 
         # calling order_by with no args to clear any pre-existing ordering (e.g. from Meta.ordering)
         qs = qs.filter(**filter_kwargs).order_by()
