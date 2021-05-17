@@ -61,7 +61,7 @@ class Command(BaseCommand):
                 allowed_http_methods='',
             )
 
-            cbv_info = get_cbv_info(url_name)
+            cbv_info = get_cbv_info(func)
             if cbv_info:
                 view_info['parents'] = ', '.join(cbv_info['parent_class_names'])
                 view_info['allowed_http_methods'] = ', '.join(cbv_info['allowed_http_methods'])
@@ -100,12 +100,7 @@ class Command(BaseCommand):
         return console_output
 
 
-def get_cbv_info(url_name):
-    if url_name is None:
-        return
-
-    url = reverse(url_name)
-    view = resolve(url).func
+def get_cbv_info(view):
     is_class_based_view = inspect.isclass(view)
 
     if is_class_based_view:
