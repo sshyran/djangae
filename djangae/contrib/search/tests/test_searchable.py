@@ -1,7 +1,7 @@
 from djangae.contrib import search
 from djangae.contrib.search import fields
 from djangae.contrib.search.model_document import document_from_model_document
-from djangae.contrib.search.models import TokenFieldIndex
+from djangae.contrib.search.models import TokenFieldIndex, DocumentRecord
 from djangae.test import TestCase
 
 from .models import (
@@ -29,6 +29,9 @@ class CharFieldPK(search.ModelDocument):
 
 class SearchableTest(TestCase):
     def setUp(self):
+        drs = DocumentRecord.objects.all().values_list("pk", flat=True)
+        SearchableModelDocument.index().remove(drs)
+
         # Ensure that the model has been registered
         search.register(SearchableModel1, SearchableModelDocument)
         search.register(SearchableModel2, CharFieldPK)

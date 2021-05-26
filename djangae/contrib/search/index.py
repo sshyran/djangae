@@ -191,7 +191,7 @@ class Index(object):
                 # Generate a database representation of this Document use
                 # the passed ID if there is one
                 record, created = DocumentRecord.objects.update_or_create(
-                    pk=document.id,
+                    pk=document.instance_id,
                     defaults={
                         "index_stats": self.index,
                         "data": field_data

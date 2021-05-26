@@ -205,8 +205,8 @@ def register(model, model_document):
         def wrapped(self, *args, **kwargs):
             func(self, *args, **kwargs)
 
-            # Force un-indexing before re-index
-            delete_decorator(lambda self: None)(self)
+            # # Force un-indexing before re-index
+            # delete_decorator(lambda self: None)(self)
 
             attrs = {
                 f: model._meta.get_field(f).value_from_object(self)
