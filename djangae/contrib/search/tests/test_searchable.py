@@ -29,8 +29,6 @@ class CharFieldPK(search.ModelDocument):
 
 class SearchableTest(TestCase):
     def setUp(self):
-        drs = DocumentRecord.objects.all().values_list("pk", flat=True)
-        SearchableModelDocument.index().remove(drs)
 
         # Ensure that the model has been registered
         search.register(SearchableModel1, SearchableModelDocument)
