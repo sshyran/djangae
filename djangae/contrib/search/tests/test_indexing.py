@@ -322,6 +322,7 @@ class IndexingTests(TestCase):
         doc1 = Doc(text="about")
 
         index.add(doc1)
+        self.process_task_queues()
         self.assertTrue(doc1.persisted)
 
         rev = doc1.revision
@@ -331,19 +332,21 @@ class IndexingTests(TestCase):
 
         # Adding an existing document again will update the revision
         index.add(doc1)
+        self.process_task_queues()
         self.assertNotEqual(doc1.revision, rev)
         rev = doc1.revision
 
-        self.assertEqual(TokenFieldIndex.objects.count(), 2)
+        self.assertEqual(TokenFieldIndex.objects.count(), 1)
         self.assertEqual(TokenFieldIndex.objects.filter(record_id=doc1.id, revision=doc1.revision).count(), 1)
 
         # Remove then re-add should reset the revision
         self.assertEqual(index.remove(doc1), 1)
 
         index.add(doc1)
+        self.process_task_queues()
         self.assertNotEqual(doc1.revision, rev)
 
-        self.assertEqual(TokenFieldIndex.objects.count(), 3)
+        self.assertEqual(TokenFieldIndex.objects.count(), 1)
         self.assertEqual(TokenFieldIndex.objects.filter(record_id=doc1.id, revision=doc1.revision).count(), 1)
 
         # Clean up everything
