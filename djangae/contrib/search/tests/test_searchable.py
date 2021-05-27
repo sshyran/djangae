@@ -114,6 +114,7 @@ class SearchableTest(TestCase):
 
         self.i2.name = "bob"
         self.i2.save()
+        self.process_task_queues()
 
         results = SearchableModel1.objects.search("jimmy")
         self.assertFalse([x for x in results])

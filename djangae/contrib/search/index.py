@@ -66,7 +66,7 @@ def unindex_document(document):
     qs = TokenFieldIndex.objects.filter(
         record_id=document.id,
         revision=document.revision
-    ).all()
+    )
 
     defer_iteration_with_finalize(
         qs, _destroy_record, _finalize
@@ -191,7 +191,7 @@ class Index(object):
                 # Generate a database representation of this Document use
                 # the passed ID if there is one
                 record, created = DocumentRecord.objects.update_or_create(
-                    pk=document.instance_id,
+                    pk=getattr(document, 'instance_id', document.id),
                     defaults={
                         "index_stats": self.index,
                         "data": field_data
