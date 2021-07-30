@@ -242,8 +242,10 @@ class BaseParser(object):
             if node.lookup_name != node.lhs.lookup_name:
                 operator = "{}__{}".format(node.lhs.lookup_name, node.lookup_name)
 
+        # If the models differ, and we're not looking at a field on an abstract parent
         if get_top_concrete_parent(field.model) != get_top_concrete_parent(model):
-            raise NotSupportedError("Cross-join where filters are not supported on the Datastore")
+            if not issubclass(model, field.model):
+                raise NotSupportedError("Cross-join where filters are not supported on the Datastore")
 
         # Make sure we don't let people try to filter on a text field, otherwise they just won't
         # get any results!

@@ -138,7 +138,10 @@ def get_concrete_parents(model, ignore_leaf=False):
 
 @memoized
 def get_top_concrete_parent(model):
-    return get_concrete_parents(model)[-1]
+    try:
+        return get_concrete_parents(model)[-1]
+    except IndexError:
+        return None
 
 
 def get_concrete_fields(model, ignore_leaf=False):
