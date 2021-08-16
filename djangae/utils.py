@@ -11,7 +11,6 @@ from socket import socket
 
 # No SDK imports allowed in module namespace because `./manage.py runserver`
 # imports this before the SDK is added to sys.path. See bugs #899, #1055.
-logger = logging.getLogger(__name__)
 
 
 class DjangaeDeprecation(DeprecationWarning):
@@ -129,14 +128,13 @@ def retry(func, *args, **kwargs):
                 return func(*args, **kwargs)
             except catch as exc:
                 if i >= attempts:
-                    logger.error("Ran out of attempts while retrying function")
+                    logging.error("Ran out of attempts while retrying function")
                     raise  # Re-raise original exception
 
                 # The location of the errors on each attempt may change, so we log
                 # each one
-                logger.exception("Exception during retry attempt. Will retry.")
-
-                logger.info("Retrying function: %s(%s, %s) - %s", func, args, kwargs, exc)
+                logging.info(exc, exc_info=True)
+                logging.info("Retrying function: %s.%s(%s, %s) - %r", func.__module__, func.__name__, args, kwargs, exc)
 
                 # Add a slight bit of randomness (up to a second) to avoid competing tasks
                 # repeatedly clashing with each other on retries. We still cap at max_wait,
@@ -152,7 +150,7 @@ def retry(func, *args, **kwargs):
                 timeout_ms = min(timeout_ms, max_wait)
 
     except DeadlineExceededError:
-        logger.error("Timeout while running function: %s(%s, %s)", func, args, kwargs)
+        logging.error("Timeout while running function: %s(%s, %s)", func, args, kwargs)
         raise
 
 
