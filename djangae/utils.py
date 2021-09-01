@@ -112,7 +112,7 @@ def retry(func, *args, **kwargs):
 
     try:
         # If gcloudc is available, make sure we catch its TransactionFailedError
-        from gcloudc.db.transaction import TransactionFailedError
+        from gcloudc.db.backends.datastore.transaction import TransactionFailedError
     except ImportError:
         class TransactionFailedError(Exception):
             pass
