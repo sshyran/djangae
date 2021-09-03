@@ -9,9 +9,6 @@ from djangae.test import (
     TestCase,
 )
 
-from unittest import mock
-from gcloudc.db.backends.datastore.transaction import TransactionFailedError
-
 import time
 
 
@@ -107,21 +104,6 @@ class DeferIterationTestCase(TestCase):
 
         self.assertEqual(25, DeferIterationTestModel.objects.filter(touched=True).count())
         self.assertEqual(25, DeferIterationTestModel.objects.filter(finalized=True).count())
-
-    @mock.patch('djangae.utils._yield', return_value=0)
-    @mock.patch('djangae.tasks.deferred.mark_shard_complete', side_effect=TransactionFailedError)
-    def test_instances_mark_shard_complete_raises_exception(self, mock_mark_shard, mock_backoff):
-        [DeferIterationTestModel.objects.create() for i in range(2)]
-
-        defer_iteration_with_finalize(
-            DeferIterationTestModel.objects.all(),
-            callback,
-            finalize,
-            _shards=_SHARD_COUNT
-        )
-
-        self.process_task_queues()
-        import ipdb; ipdb.set_trace()
 
     def test_excluded_missed(self):
         [DeferIterationTestModel.objects.create(ignored=(i < 5)) for i in range(25)]

@@ -343,39 +343,6 @@ class TimeoutException(Exception):
     pass
 
 
-@transaction.atomic(xg=True)
-def mark_shard_complete(marker_id, finalize, args, kwargs):
-    try:
-        marker = DeferIterationMarker.objects.get(pk=marker_id)
-        # marker.refresh_from_db()
-    except DeferIterationMarker.DoesNotExist:
-        logger.warning(
-            "TaskMarker with ID: %s has vanished, cancelling task",
-            marker_id
-        )
-        return
-
-    marker.shards_complete += 1
-    marker.save()
-
-    queue = task_queue_name()
-    if queue:
-        queue = queue.rsplit("/", 1)[-1]
-
-    if marker.shards_complete == marker.shard_count:
-        # Delete the marker if we were asked to
-        if marker.delete_on_completion:
-            marker.delete()
-
-        defer(
-            finalize,
-            *args,
-            _transactional=True,
-            _queue=queue,
-            **kwargs
-        )
-
-
 def _process_shard(marker_id, shard_number, model, query, callback, finalize, args, kwargs):
     args = args or tuple()
 
@@ -434,14 +401,33 @@ def _process_shard(marker_id, shard_number, model, query, callback, finalize, ar
                     callback_time
                 )
         else:
-            retry(
-                mark_shard_complete,
-                marker_id,
-                finalize,
-                args=args,
-                kwargs=kwargs,
-                _attempts=6
-            )
+            @transaction.atomic(xg=True)
+            def mark_shard_complete():
+                try:
+                    marker.refresh_from_db()
+                except DeferIterationMarker.DoesNotExist:
+                    logger.warning(
+                        "TaskMarker with ID: %s has vanished, cancelling task",
+                        marker_id
+                    )
+                    return
+
+                marker.shards_complete += 1
+                marker.save()
+
+                if marker.shards_complete == marker.shard_count:
+                    # Delete the marker if we were asked to
+                    if marker.delete_on_completion:
+                        marker.delete()
+
+                    defer(
+                        finalize,
+                        *args,
+                        _transactional=True,
+                        _queue=queue,
+                        **kwargs
+                    )
+            retry(mark_shard_complete, _attempts=6)
 
     except (Exception, TimeoutException) as e:
         # If we get any kind of exception, we want to redefer from where we got to, and we'll keep doing

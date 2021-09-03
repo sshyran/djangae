@@ -103,12 +103,22 @@ def _yield(seconds):  # Patchable
     time.sleep(seconds)
 
 
-def retry(func, *args, _catch=None, _attempts=3, _initial_wait=750,
-        _max_wait=30000, _avoid_clashes=True, _log_trace=False, **kwargs):
+def retry(
+    func,
+    *args,
+    _catch=None,
+    _attempts=3,
+    _initial_wait=750,
+    _max_wait=30000,
+    _avoid_clashes=True,
+    _log_trace=False,
+    **kwargs
+):
     """ Calls a function that may intermittently fail, catching the given error(s) and (re)trying
         for a maximum of `_attempts` times.
 
-        :param _catch: an tuple or object representing the exception that should be caught instead of raised by the function
+        :param _catch: an tuple or object representing the exception that should be caught instead of raised by
+                       the function
         :type _catch: tuple, optional
         :param _attempts: the number of attempts the fuction should (re)try. Default: 3
         :type _attempts: int, optional
@@ -140,7 +150,6 @@ def retry(func, *args, _catch=None, _attempts=3, _initial_wait=750,
         GoogleAPIError,
         DatabaseError,
     )
-
 
     i = 0
     while True:
