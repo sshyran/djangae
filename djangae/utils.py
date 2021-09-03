@@ -8,6 +8,7 @@ import sys
 import time
 import warnings
 from socket import socket
+from django.db import DatabaseError
 
 
 # No SDK imports allowed in module namespace because `./manage.py runserver`
@@ -102,21 +103,32 @@ def _yield(seconds):  # Patchable
     time.sleep(seconds)
 
 
-def retry(func, *args, **kwargs):
+def retry(func, *args, _catch=None, _attempts=3, _initial_wait=750,
+        _max_wait=30000, _avoid_clashes=True, _log_trace=False, **kwargs):
     """ Calls a function that may intermittently fail, catching the given error(s) and (re)trying
         for a maximum of `_attempts` times.
+
+        :param _catch: an tuple or object representing the exception that should be caught instead of raised by the function
+        :type _catch: tuple, optional
+        :param _attempts: the number of attempts the fuction should (re)try. Default: 3
+        :type _attempts: int, optional
+        :param _initial_wait: initial amount of milliseconds the function should wait before retrying. Default: 750
+        :type _initial_wait: int, optional
+        :param _max_wait: max amount of milliseconds the function should wait before retrying. Default: 30000
+        :type _max_wait: int, optional
+        :param _avoid_clashes: Whether or not to add a random element to the sleep times. Default: `True`
+        :type _avoid_clashes: bool, optional
+        :param _log_trace: Whether or not log exception stacktrace. Default: `False`
+        :type _log_trace: bool, optional
+
     """
+    attempts = _attempts
+    timeout_ms = _initial_wait
+    max_wait = _max_wait
+    randomize = _avoid_clashes
 
     # The following imports are inline because utils.py can end up being imported from settings.py
     # and an attempt to access any database stuff from settings.py results in... importing settings.py
-
-    try:
-        # If gcloudc is available, make sure we catch its TransactionFailedError
-        from gcloudc.db.backends.datastore.transaction import TransactionFailedError
-    except ImportError:
-        class TransactionFailedError(Exception):
-            pass
-
     try:
         # Try to import the core GoogleAPIError
         from google.api_core.exceptions import GoogleAPIError
@@ -124,18 +136,11 @@ def retry(func, *args, **kwargs):
         class GoogleAPIError(Exception):
             pass
 
-    # Slightly weird `.pop(x, None) or default` thing here due to not wanting to repeat the tuple of
-    # default things in `retry_on_error` and having to do inline imports
-    catch = kwargs.pop('_catch', None) or (
+    catch = _catch or (
         GoogleAPIError,
-        TransactionFailedError,
+        DatabaseError,
     )
-    attempts = kwargs.pop('_attempts', 3)
-    timeout_ms = kwargs.pop('_initial_wait', 750)  # Try 750, 1500, 3000 etc.
-    max_wait = kwargs.pop('_max_wait', 30000)
 
-    # Whether or not to add a random element to the sleep times
-    randomize = kwargs.pop('_avoid_clashes', True)
 
     i = 0
     while True:
@@ -147,9 +152,8 @@ def retry(func, *args, **kwargs):
                 logger.error("Ran out of attempts while retrying function")
                 raise  # Re-raise original exception
 
-            # The location of the errors on each attempt may change, so we log
-            # each one
-            logger.exception("Exception during retry attempt. Will retry.")
+            if _log_trace:
+                logger.exception("Exception during retry attempt. Will retry.")
 
             logger.info("Retrying function: %s(%s, %s) - %s", func, args, kwargs, exc)
 

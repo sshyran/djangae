@@ -2,6 +2,7 @@ from django.db import models
 from djangae.contrib import sleuth
 from djangae.test import TestCase
 from djangae.utils import get_next_available_port, retry, retry_on_error
+from gcloudc.db.backends.datastore.transaction import TransactionFailedError
 
 
 class AvailablePortTests(TestCase):
