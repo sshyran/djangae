@@ -125,6 +125,7 @@ def start_emulators(
     enable_test_environment_variables()
 
     if "datastore" in emulators:
+        logger.info("Starting datastore emulator on %s." % datastore_port)
         if not port_is_open(SERVICE_HOST, datastore_port):
             # If start_emulators is call explicitly passing the Datastore Emulator port
             # and the port is not available raise and Runtime exception.
@@ -132,6 +133,7 @@ def start_emulators(
                 raise RuntimeError(f"Unable to start Cloud Datastore Emulator at port {datastore_port}.")
             else:
                 datastore_port = get_next_available_port(SERVICE_HOST, datastore_port)
+                logger.info("Datastore port is not opened, trying on %s." % datastore_port)
 
         os.environ["DATASTORE_EMULATOR_HOST"] = f"{SERVICE_HOST}:{datastore_port}"
         os.environ["DATASTORE_PROJECT_ID"] = project_id
@@ -145,17 +147,20 @@ def start_emulators(
         if not persist_data:
             command += " --no-store-on-disk"
 
+        logger.info("Starting datastore emulator with command: %s." % command)
         _ACTIVE_EMULATORS["datastore"] = _launch_process(command)
         _wait_for_datastore(datastore_port)
 
     if "tasks" in emulators:
         # If start_emulators is call explicitly passing the Cloud Task emulator port
         # and the port is not available raise and Runtime exception.
+        logger.info("Starting tasks emulator on %s." % tasks_port)
         if not port_is_open(SERVICE_HOST, tasks_port):
             if tasks_port != DEFAULT_TASKS_PORT:
                 raise RuntimeError(f"Unable to start Cloud Tasks Emulator at port {tasks_port}.")
             else:
                 tasks_port = get_next_available_port(SERVICE_HOST, tasks_port)
+                logger.info("Task emulator port is not opened, trying on %s." % tasks_port)
 
         from djangae.tasks import cloud_tasks_location, cloud_tasks_parent_path, cloud_tasks_project
         default_queue = "%s/queues/default" % cloud_tasks_parent_path()
@@ -186,6 +191,7 @@ def start_emulators(
             logger.warn("task_queue_yaml was passed, but the file does not exist. Ignoring.")
 
         os.environ["TASKS_EMULATOR_HOST"] = f"{SERVICE_HOST}:{tasks_port}"
+        logger.info("Starting tasks emulator with command: %s." % command)
         _ACTIVE_EMULATORS["tasks"] = _launch_process(command)
         _wait_for_tasks(tasks_port)
 
@@ -205,6 +211,7 @@ def start_emulators(
         if not persist_data:
             command += " --no-store-on-disk"
 
+        logger.info("Starting storage emulator with command: %s." % command)
         _ACTIVE_EMULATORS["storage"] = _launch_process(command)
         _wait_for_storage(storage_port)
 
