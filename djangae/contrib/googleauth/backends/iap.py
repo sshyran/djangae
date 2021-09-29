@@ -15,6 +15,7 @@ from djangae.contrib.googleauth import (
     _GOOG_AUTHENTICATED_USER_ID_HEADER,
     _GOOG_JWT_ASSERTION_HEADER,
     _IAP_AUDIENCE,
+    _JWT_SIGNING_ENABLED_SETTING
 )
 from djangae.contrib.googleauth.models import UserManager
 
@@ -53,7 +54,15 @@ class IAPBackend(BaseBackend):
         namespace, user_id = user_id.split(":", 1)
         _, email = email.split(":", 1)
 
-        if not getattr(request, "_through_local_iap_middleware", False):
+        # See if we should check the JWT token
+        check_jwt = getattr(settings, _JWT_SIGNING_ENABLED_SETTING, True)
+
+        if getattr(request, "_through_local_iap_middleware", False):
+            # If this flag is set, we don't check JWT as we're doing
+            # things locally
+            check_jwt = False
+
+        if check_jwt:
             try:
                 audience = _get_IAP_audience_from_settings()
             except AttributeError:

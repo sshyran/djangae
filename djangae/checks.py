@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.core.checks import register, Tags, Error
-
+from djangae.contrib.googleauth import _JWT_SIGNING_ENABLED_SETTING
 
 CSP_SOURCE_NAMES = [
     'CSP_DEFAULT_SRC',
@@ -74,4 +74,28 @@ def check_cached_template_loader_used(app_configs=None, **kwargs):
             id='djangae.E003',
         )
         return [error]
+    return []
+
+
+@register(Tags.security, deploy=True)
+def check_jwt_signing_enabled(app_configs=None, **kwargs):
+    """
+        Ensure that JWT signing is enabled if we're deploying
+        with the IAPBackend.
+    """
+
+    IAP_BACKEND = "djangae.contrib.googleauth.backends.iap.IAPBackend"
+
+    if IAP_BACKEND not in settings.AUTHENTICATION_BACKENDS:
+        return []
+
+    if not getattr(settings, _JWT_SIGNING_ENABLED_SETTING, True):
+        return [
+            Error(
+                "JWT_TOKEN_SIGNING_DISABLED",
+                hint="Please change your %s setting to True" % _JWT_SIGNING_ENABLED_SETTING,
+                id='djangae.E004',
+            )
+        ]
+
     return []

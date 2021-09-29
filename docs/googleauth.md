@@ -150,6 +150,10 @@ In order to use IAP backend you need to set `GOOGLEAUTH_IAP_JWT_AUDIENCE` in you
 
 Please refer to this [page](https://cloud.google.com/iap/docs/signed-headers-howto#verifying_the_jwt_header) for more context.
 
+The JWT audience is used to check that the IAP headers haven't been tampered with. If you are testing
+locally then you can disable the JWT checking by setting the `GOOGLEAUTH_IAP_JWT_ENABLED` setting
+to `False`. It is highly recommended to keep this setting to `True` on production!
+
 ## Testing Authentication Locally
 
 googleauth ships with a middleware class that simulates IAP authentication.
