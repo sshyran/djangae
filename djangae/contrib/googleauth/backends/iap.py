@@ -88,7 +88,7 @@ class IAPBackend(BaseBackend):
                 )
 
         email = UserManager.normalize_email(email)
-        assert email
+        assert(email)
 
         username = email.split("@", 1)[0]
 
