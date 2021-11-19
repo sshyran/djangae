@@ -23,6 +23,7 @@ from djangae.tasks.environment import (
     task_queue_name,
     task_execution_count,
     task_retry_count,
+    tasks_location,
 )
 from djangae.tasks import environment
 from djangae.tasks.middleware import _TASK_NAME_HEADER, task_environment_middleware
@@ -199,3 +200,8 @@ class EnvironmentTests(TestCase):
         self.assertIsNone(task_queue_name())
         self.assertIsNone(task_retry_count())
         self.assertIsNone(task_execution_count())
+
+    def test_tasks_location(self):
+        self.assertEqual(tasks_location("e~example-app"), "europe-west1")
+        self.assertEqual(tasks_location("zwn~example-app"), "us-west4")
+        self.assertIsNone(tasks_location("xxx~example-app"))

@@ -61,3 +61,44 @@ def task_execution_count() -> Optional[int]:
     if is_in_task():
         return getattr(_TASK_ENV, "task_execution_count", 0)
     return None
+
+
+def tasks_location(app_id_with_prefix=None) -> Optional[str]:
+    """
+        Returns the cloud tasks location based on the application
+        ID prefix. Returns None if unsuccessful. If no app_id
+        is specified then it is read from the result of
+        djangae.environment.application_id
+    """
+
+    from djangae.environment import application_id
+
+    LOOKUP = {
+        'b': 'asia-northeast1',
+        'd': 'us-east4',
+        'e': 'europe-west1',
+        'f': 'australia-southeast',
+        'g': 'europe-west2',
+        'h': 'europe-west3',
+        'i': 'southamerica-east1',
+        'j': 'asia-south1',
+        'k': 'northamerica-northeast1',
+        'm': 'us-west2',
+        'n': 'asia-east2',
+        'o': 'europe-west6',
+        'p': 'us-east1',
+        's': 'us-central1',
+        'u': 'asia-northeast2',
+        'v': 'asia-northeast3',
+        'zas': 'asia-southeast1',
+        'zde': 'asia-east1',
+        'zet': 'asia-southeast2',
+        'zlm': 'europe-central2',
+        'zuw': 'us-west1',
+        'zwm': 'us-west3',
+        'zwn': 'us-west4',
+    }
+
+    app_id_with_prefix = application_id() or app_id_with_prefix
+    location_id = app_id_with_prefix.split("~", 1)[0]
+    return LOOKUP.get(location_id)

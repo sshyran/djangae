@@ -45,3 +45,8 @@ ALLOWED_HOSTS = ("*",)
 
 # We set this default because Cloud Datastore uses signed 64 bit integers for IDs
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+# Set a default CLOUD_TASKS_LOCATION variable based on the environment (if we can)
+from djangae.tasks.environment import tasks_location
+CLOUD_TASKS_LOCATION = tasks_location()

@@ -24,22 +24,27 @@ Returns the root folder of your application (this is the folder containing app.y
 
 For the task-specific environment functions and decorators to work, you must add `djangae.tasks.middleware.TaskEnvironmentMiddleware` to your `MIDDLEWARE` setting.
 
-## djangae.environment.task_name()
+## djangae.tasks.environment.task_name()
 
 Returns the current task name if the code is running on a task queue
 
-## djangae.environment.task_queue_name()
+## djangae.tasks.environment.task_queue_name()
 
 Returns the current task queue name if the code is running on a task queue
 
-## djangae.environment.is_in_task()
+## djangae.tasks.environment.is_in_task()
 
 Returns true if the code is running in a task on the task queue
 
-## djangae.environment.task_retry_count()
+## djangae.tasks.environment.task_retry_count()
 
 Returns the number of times the task has retried, or 0 if the code is not
 running on a queue
+
+## djangae.tasks.environment.tasks_location
+
+Returns the Cloud Tasks location ID based on the App Engine application ID. This uses an internal
+mapping between application ID prefix, and Cloud Tasks location.
 
 # Decorators
 
