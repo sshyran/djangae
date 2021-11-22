@@ -12,6 +12,32 @@ project that simulates the Cloud Task API locally.
 
 Djangae's sandbox.py provides functionality to start/stop the emulator for you, and djangae.tasks integrates with the emulator when it's running.
 
+## Queue Initialisation
+
+In the Python 2 App Engine runtime - a file named queue.yaml was used to define new task queues. When App Engine tasks were migrated to Cloud Tasks, queue.yaml
+was effectively deprecated (or at least introduces conflicts with the wider Cloud Tasks configuration).
+
+It is however useful to be able to create or update queues from a configuration setting in your project. `djangae.tasks` provides the `CLOUD_TASKS_QUEUES` setting to do this.
+
+`CLOUD_TASKS_QUEUES` is a list of dictionaries to create or update task queues. On app initialisation the queues are checked to see if they exist or need updating
+and the configuration changes are applied.
+
+Here is an example configuration:
+
+```
+[
+   {
+      "name": "default",
+      "rate_per_second": "1",  # The tasks per second
+      "rate_max_concurrent": 10,  # The maximium number of concurrent tasks to run
+      "retry_max_attempts": 3,  # -1 indicates retry forever (recommended)
+   }
+]
+```
+
+> Note! There are many more options for queue configuration that can be configured via API, but only these are supported via the `CLOUD_TASKS_QUEUES` setting.
+
+
 ## djangae.tasks.deferred.defer
 
 This allows you to take any function along with the arguments to be passed to it, and defer the function call to be run in the background by Google Cloud Tasks.

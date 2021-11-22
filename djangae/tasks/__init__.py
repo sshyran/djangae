@@ -4,6 +4,7 @@ from djangae.environment import project_id as gae_project_id
 import logging
 import os
 import grpc
+from google.protobuf import field_mask_pb2
 
 default_app_config = 'djangae.tasks.apps.DjangaeTasksConfig'
 
@@ -61,13 +62,30 @@ def ensure_required_queues_exist():
         # etc. involves changing a load of settings.
         assert("/" not in queue_name)  # Don't specify the full path
 
+        update_mask = ["name"]
         queue_dict = queue.copy()
         queue_dict["name"] = "%s/queues/%s" % (parent_path, queue_name)
+        queue_dict["rateLimits"] = {}
+        queue_dict["retryConfig"] = {}
 
-        logging.info("Ensuring task queue: %s", queue_dict["name"])
-        client.create_queue(
+        if "rate_per_second" in queue:
+            update_mask.append("rateLimits.maxDispatchesPerSecond")
+            queue_dict["rateLimits"]["maxDispatchesPerSecond"] = queue["rate_per_second"]
+
+        if "rate_max_concurrent" in queue:
+            update_mask.append("rateLimits.maxConcurrentDispatches")
+            queue_dict["rateLimits"]["maxConcurrentDispatches"] = queue["rate_max_concurrent"]
+
+        if "retry_max_attempts" in queue:
+            update_mask.append("retryConfig.maxAttempts")
+            queue_dict["retryConfig"]["maxAttempts"] = queue["retry_max_attempts"]
+
+        logging.info("Ensuring task queue is up-to-date: %s", queue_dict["name"])
+
+        client.update_queue(
             parent=parent_path,
-            queue=queue_dict
+            queue=queue_dict,
+            update_mask=field_mask_pb2.FieldMask(paths=update_mask)
         )
 
 
