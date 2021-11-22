@@ -63,7 +63,7 @@ def ensure_required_queues_exist():
         assert("/" not in queue_name)  # Don't specify the full path
 
         update_mask = ["name"]
-        queue_dict = queue.copy()
+        queue_dict = {}
         queue_dict["name"] = "%s/queues/%s" % (parent_path, queue_name)
         queue_dict["rate_limits"] = {}
         queue_dict["retry_config"] = {}
@@ -82,8 +82,11 @@ def ensure_required_queues_exist():
 
         logging.info("Ensuring task queue is up-to-date: %s", queue_dict["name"])
 
+        from google.cloud.tasks_v2.types import Queue
+        queue = Queue(**queue_dict)
+
         client.update_queue(
-            queue=queue_dict,
+            queue=queue,
             update_mask=field_mask_pb2.FieldMask(paths=update_mask)
         )
 
