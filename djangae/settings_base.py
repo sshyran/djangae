@@ -1,4 +1,5 @@
 from djangae.environment import is_production_environment
+from djangae.tasks.environment import tasks_location
 
 FILE_CACHE_LOCATION = '/tmp/cache' if is_production_environment() else '.cache'
 
@@ -48,5 +49,4 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 # Set a default CLOUD_TASKS_LOCATION variable based on the environment (if we can)
-from djangae.tasks.environment import tasks_location
 CLOUD_TASKS_LOCATION = tasks_location()
