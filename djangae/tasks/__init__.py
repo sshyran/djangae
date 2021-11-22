@@ -83,7 +83,7 @@ def ensure_required_queues_exist():
         logging.info("Ensuring task queue is up-to-date: %s", queue_dict["name"])
 
         client.update_queue(
-            parent=parent_path,
+            name=queue_dict["name"],
             queue=queue_dict,
             update_mask=field_mask_pb2.FieldMask(paths=update_mask)
         )
