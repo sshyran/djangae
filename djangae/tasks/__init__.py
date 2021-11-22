@@ -65,20 +65,20 @@ def ensure_required_queues_exist():
         update_mask = ["name"]
         queue_dict = queue.copy()
         queue_dict["name"] = "%s/queues/%s" % (parent_path, queue_name)
-        queue_dict["rateLimits"] = {}
-        queue_dict["retryConfig"] = {}
+        queue_dict["rate_limits"] = {}
+        queue_dict["retry_config"] = {}
 
         if "rate_per_second" in queue:
-            update_mask.append("rateLimits.maxDispatchesPerSecond")
-            queue_dict["rateLimits"]["maxDispatchesPerSecond"] = queue["rate_per_second"]
+            update_mask.append("rate_limits.max_dispatches_per_second")
+            queue_dict["rate_limits"]["max_dispatches_per_second"] = queue["rate_per_second"]
 
         if "rate_max_concurrent" in queue:
-            update_mask.append("rateLimits.maxConcurrentDispatches")
-            queue_dict["rateLimits"]["maxConcurrentDispatches"] = queue["rate_max_concurrent"]
+            update_mask.append("rate_limits.max_concurrent_dispatches")
+            queue_dict["rate_limits"]["max_concurrent_dispatches"] = queue["rate_max_concurrent"]
 
         if "retry_max_attempts" in queue:
-            update_mask.append("retryConfig.maxAttempts")
-            queue_dict["retryConfig"]["maxAttempts"] = queue["retry_max_attempts"]
+            update_mask.append("retry_config.max_attempts")
+            queue_dict["retry_config"]["max_attempts"] = queue["retry_max_attempts"]
 
         logging.info("Ensuring task queue is up-to-date: %s", queue_dict["name"])
 
