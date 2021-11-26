@@ -48,8 +48,8 @@ def get_cloud_tasks_client():
 
 def ensure_required_queues_exist():
     """
-        Reads settings.CLOUD_TASK_QUEUES_REQUIRED
-        and calls create_queue for them if they don't exist
+        Reads settings.CLOUDS_TASKS_QUEUES
+        and creates or updates the specified queues
     """
     client = get_cloud_tasks_client()
     parent_path = cloud_tasks_parent_path()
