@@ -3,6 +3,8 @@ from typing import Optional
 
 from django.core.exceptions import ImproperlyConfigured
 
+from djangae.environment import application_id
+
 _TASK_ENV = threading.local()
 
 
@@ -70,8 +72,6 @@ def tasks_location(app_id_with_prefix=None) -> Optional[str]:
         is specified then it is read from the result of
         djangae.environment.application_id
     """
-
-    from djangae.environment import application_id
 
     LOOKUP = {
         'b': 'asia-northeast1',
